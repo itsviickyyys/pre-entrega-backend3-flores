@@ -1,15 +1,11 @@
-
 import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try {
-        await mongoose.connect('mongodb://localhost:27017/mockDB', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        console.log('Conexión a la base de datos exitosa');
+        await mongoose.connect(process.env.MONGO_URL);
+        console.log('🟢 Conectado a MongoDB');
     } catch (error) {
-        console.error('Error al conectar con la base de datos', error);
+        console.error('🔴 Error al conectar a MongoDB:', error);
         process.exit(1);
     }
 };
