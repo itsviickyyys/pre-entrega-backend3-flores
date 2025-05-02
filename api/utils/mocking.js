@@ -1,35 +1,79 @@
-// utils/mocking.js
+
 import bcrypt from 'bcrypt';
 import { faker } from '@faker-js/faker';
+import User from '../models/User.js';
+import Pet from '../models/Pet.js';
 
-// Función para encriptar la contraseña
+// Función para encriptar contraseñas
 const encryptPassword = async (password) => {
     const saltRounds = 10;
     return await bcrypt.hash(password, saltRounds);
 };
 
-// Función para generar usuarios falsos con mascotas
+// Generar usuarios falsos (solo en memoria, NO insertar en base de datos)
 export const generateMockUsers = async (numUsers) => {
     const users = [];
-    const hashedPassword = await encryptPassword('coder123');  // Contraseña encriptada
+    const hashedPassword = await encryptPassword('coder123');
 
     for (let i = 0; i < numUsers; i++) {
-        // Generamos entre 0 y 3 mascotas para cada usuario
-        const pets = Array.from({ length: faker.datatype.number({ min: 0, max: 3 }) }, () => ({
-            name: faker.animal.dog(),  // Nombre de la mascota
-            type: faker.helpers.arrayElement(['Perro', 'Gato', 'Pájaro', 'Conejo']),  // Tipo de mascota aleatorio
-            age: faker.datatype.number({ min: 1, max: 10 })  // Edad de la mascota
-        }));
-
         users.push({
             _id: faker.string.uuid(),
             name: faker.person.fullName(),
             email: faker.internet.email(),
-            password: hashedPassword,  // Contraseña encriptada
-            role: faker.helpers.arrayElement(['user', 'admin']),  // Rol aleatorio
-            pets: pets  // Array de mascotas
+            password: hashedPassword,
+            role: faker.helpers.arrayElement(['user', 'admin']),
+            pets: []  // Array vacío
+        });
+    }
+    return users;
+};
+
+// Generar mascotas falsas (solo en memoria, NO insertar en base de datos)
+export const generateMockPets = (numPets) => {
+    const pets = [];
+
+    for (let i = 0; i < numPets; i++) {
+        pets.push({
+            _id: faker.string.uuid(),
+            name: faker.animal.dog(),
+            type: faker.helpers.arrayElement(['Perro', 'Gato', 'Pájaro', 'Conejo']),
+            age: faker.datatype.number({ min: 1, max: 10 })
+        });
+    }
+    return pets;
+};
+
+// Generar e insertar usuarios en base de datos
+export const generateUsersInDB = async (numUsers) => {
+    const hashedPassword = await encryptPassword('coder123');
+    const users = [];
+
+    for (let i = 0; i < numUsers; i++) {
+        users.push({
+            name: faker.person.fullName(),
+            email: faker.internet.email(),
+            password: hashedPassword,
+            role: faker.helpers.arrayElement(['user', 'admin']),
+            pets: []
         });
     }
 
-    return users;
+    const createdUsers = await User.create(users);
+    return createdUsers;
+};
+
+// Generar e insertar mascotas en base de datos
+export const generatePetsInDB = async (numPets) => {
+    const pets = [];
+
+    for (let i = 0; i < numPets; i++) {
+        pets.push({
+            name: faker.animal.dog(),
+            type: faker.helpers.arrayElement(['Perro', 'Gato', 'Pájaro', 'Conejo']),
+            age: faker.datatype.number({ min: 1, max: 10 })
+        });
+    }
+
+    const createdPets = await Pet.create(pets);
+    return createdPets;
 };
